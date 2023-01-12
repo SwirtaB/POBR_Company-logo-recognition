@@ -1,7 +1,8 @@
 import cv2 as cv
 import sys
 import color_converters as cc
-import resizers
+import resizers as res
+import processing as proc
 
 
 def main() -> int:
@@ -11,15 +12,10 @@ def main() -> int:
     if image is None:
         sys.exit(f"Could not read image under path: {path}")
 
-    # cv.imshow("HSV mine", cc.BGR_to_HSV(image))
-    # cv.imshow("HSV lib", cv.cvtColor(image, cv.COLOR_BGR2HSV))
-    # cv.waitKey(0)
-    nn_resized = resizers.resize(image, 720, 1280, resizers.nn_interpolation)
-    cv.imshow("nn resized", nn_resized)
-
-    bl_resized = resizers.resize(image, 720, 1280,
-                                 resizers.bilinear_interpolation)
-    cv.imshow("bl esized", bl_resized)
+    resized = res.resize(image, 360, 640, res.bilinear_interpolation)
+    blured = proc.applay_convolution(resized, proc.BLUR_KERNEL)
+    cv.imshow("resized", resized)
+    cv.imshow("image", blured)
     cv.waitKey(0)
 
     return 0
