@@ -3,6 +3,7 @@ import sys
 import color_converters as cc
 import resizers as res
 import processing as proc
+import config
 
 
 def main() -> int:
@@ -13,9 +14,16 @@ def main() -> int:
         sys.exit(f"Could not read image under path: {path}")
 
     resized = res.resize(image, 360, 640, res.bilinear_interpolation)
-    blured = proc.applay_convolution(resized, proc.BLUR_KERNEL)
+    hsv = cc.BGR_to_HSV(resized)
+    fixed = proc.equalize_histogram(hsv)
+    bgr = cc.HSV_to_BGR(fixed)
     cv.imshow("resized", resized)
-    cv.imshow("image", blured)
+    cv.imshow("fixed", bgr)
+
+    # resized = res.resize(image, 360, 640, res.bilinear_interpolation)
+    # blured = proc.applay_convolution(resized, proc.BLUR_KERNEL_CLASSIC)
+    # cv.imshow("resized", resized)
+    # cv.imshow("image", blured)
     cv.waitKey(0)
 
     return 0

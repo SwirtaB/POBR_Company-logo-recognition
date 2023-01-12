@@ -33,3 +33,35 @@ def BGR_to_HSV(image: np.ndarray) -> np.ndarray:
                                       dtype=np.uint8)
 
     return imageHSV
+
+
+def HSV_to_BGR(image: np.ndarray) -> np.ndarray:
+    imageBGR = np.zeros(image.shape, dtype=np.uint8)
+
+    for y, row in enumerate(image):
+        for x, pixel in enumerate(row):
+            h, s, v = pixel
+            h, s, v = h * 2, s / 255, v / 255
+            c = v * s
+            t = c * (1 - abs(((h / 60) % 2) - 1))
+
+            r, g, b = 0, 0, 0
+            if h < 60:
+                r, g, b = c, t, 0
+            elif h < 120:
+                r, g, b = t, c, 0
+            elif h < 180:
+                r, g, b = 0, c, t
+            elif h < 240:
+                r, g, b = 0, t, c
+            elif h < 300:
+                r, g, b = t, 0, c
+            else:
+                r, g, b = c, 0, t
+
+            m = v - c
+            imageBGR[y][x] = np.array([(b + m) * 255, (g + m) * 255,
+                                       (r + m) * 255],
+                                      dtype=np.uint8)
+
+    return imageBGR

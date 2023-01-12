@@ -1,7 +1,13 @@
 import numpy as np
 
-BLUR_KERNEL = np.array([[1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9],
-                        [1 / 9, 1 / 9, 1 / 9]])
+BLUR_KERNEL_CLASSIC = np.array([[1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9],
+                                [1 / 9, 1 / 9, 1 / 9]])
+BLUR_KERNEL_GAUSS = np.array([[1 / 10, 1 / 10,
+                               1 / 10], [1 / 10, 2 / 10, 1 / 10],
+                              [1 / 10, 1 / 10, 1 / 10]])
+BLUR_KERNEL_LAPLACE = np.array([[1 / 16, 2 / 16, 1 / 16],
+                                [2 / 16, 4 / 16, 2 / 16],
+                                [1 / 16, 2 / 16, 1 / 16]])
 
 
 def applay_convolution(image: np.ndarray, kernel: np.ndarray) -> np.ndarray:
@@ -20,3 +26,37 @@ def applay_convolution(image: np.ndarray, kernel: np.ndarray) -> np.ndarray:
                     kernel),
                                               dtype=np.uint8)
     return output
+
+
+def optain_histogram(image: np.ndarray) -> np.ndarray:
+    histogram = np.zeros(256, dtype=np.uint64)
+    image_height, image_width, _ = image.shape
+
+    for row in range(image_height):
+        for col in range(image_width):
+            histogram[image[row][col][2]] += 1
+
+    return histogram
+
+
+def create_LUT(histogram: np.ndarray, n_pixels: np.uint) -> np.ndarray:
+    LUT = np.zeros(len(histogram), dtype=np.uint64)
+    p_sum = 0
+    for i, hist_i in enumerate(histogram):
+        p_sum += hist_i
+        LUT[i] = p_sum * 255 / n_pixels
+
+    return LUT
+
+
+def equalize_histogram(image: np.ndarray) -> np.ndarray:
+    image_height, image_width, _ = image.shape
+
+    histogram = optain_histogram(image)
+    LUT = create_LUT(histogram, image_height * image_width)
+
+    for row in range(image_height):
+        for col in range(image_width):
+            image[row][col][2] = np.uint8(LUT[image[row][col][2]])
+
+    return image
