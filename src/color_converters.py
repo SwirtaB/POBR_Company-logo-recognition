@@ -23,7 +23,7 @@ def BGR_to_HSV(image: np.ndarray) -> np.ndarray:
             if r == g == b:
                 h = 0
             elif v == r:
-                h = 60 * (g - b) / diff
+                h = 60 * (((g - b) / diff) % 6)
             elif v == g:
                 h = 60 * (b - r) / diff + 120
             elif v == b:
@@ -65,3 +65,9 @@ def HSV_to_BGR(image: np.ndarray) -> np.ndarray:
                                       dtype=np.uint8)
 
     return imageBGR
+
+
+# print(
+#     BGR_to_HSV(
+#         np.array([[[64, 93, 180], [140, 162, 250], [33, 138, 250],
+#                    [88, 45, 128]]])))
