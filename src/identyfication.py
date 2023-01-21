@@ -23,6 +23,7 @@ def filter_segments(segments: List[List[Segment]]) -> List[List[Segment]]:
     return result
 
 
+# FIXME recognize conditions - probably matches random G, B or Y which forces to skip valid R
 def try_recognize_logo(segments: List[List[Segment]]) -> List[List[Segment]]:
     logos = []
     for R_square in segments[0]:
@@ -33,7 +34,7 @@ def try_recognize_logo(segments: List[List[Segment]]) -> List[List[Segment]]:
                                               G_square.global_center[1]):
                 logo.append(G_square)
 
-        for B_square in segments[1]:
+        for B_square in segments[2]:
             if (R_square.bbox[0][1] <= B_square.global_center[1] <=
                     R_square.bbox[1][1]) and (R_square.global_center[0] <
                                               B_square.global_center[0]):
@@ -42,7 +43,7 @@ def try_recognize_logo(segments: List[List[Segment]]) -> List[List[Segment]]:
         if len(logo) != 3:
             continue
 
-        for Y_square in segments[1]:
+        for Y_square in segments[3]:
             if (Y_square.bbox[0][1] <= logo[1].global_center[1] <=
                     Y_square.bbox[1][1]
                     and Y_square.global_center[0] > logo[1].global_center[0]
