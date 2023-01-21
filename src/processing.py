@@ -39,7 +39,7 @@ def optain_histogram(image: np.ndarray) -> np.ndarray:
     return histogram
 
 
-def create_LUT(histogram: np.ndarray, n_pixels: np.uint) -> np.ndarray:
+def create_LUT(histogram: np.ndarray, n_pixels: int) -> np.ndarray:
     LUT = np.zeros(len(histogram), dtype=np.uint64)
     p_sum = 0
     for i, hist_i in enumerate(histogram):

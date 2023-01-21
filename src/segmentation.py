@@ -29,15 +29,15 @@ class Segment:
 
     def __init__(self, pixels: List[Tuple[int, int]], image_height: int,
                  image_width: int):
-        self.image_height = image_height
-        self.image_width = image_width
         self.pixels = pixels
         self.bbox = self._calculate_bounding_box(image_height, image_width)
         self.local_image = self._build_local_image()
+        self.center = (round(self._calculate_m_pq(1, 0) / self.pixels_count()),
+                       round(self._calculate_m_pq(0, 1) / self.pixels_count()))
         self.W3 = self._calculate_w3(self._calculate_circumference(),
                                      len(self.pixels))
-        # self.M1 =
-        # self.M7 =
+        self.M1_norm = self._calculate_M1_normalized()
+        self.M7_norm = self._calculate_M7_normalized()
 
     def pixels_count(self) -> int:
         return len(self.pixels)
@@ -83,6 +83,41 @@ class Segment:
     def _calculate_w3(self, circumference: int, area: int) -> float:
         return (circumference / (2 * math.sqrt(math.pi * area))) - 1
 
+    def _calculate_m_pq(self, p: int, q: int) -> int:
+        local_height, local_width = self.local_image.shape
+        m_pq = 0
+        for row in range(local_height):
+            for col in range(local_width):
+                # local image has bool value - True if there is object's pixel, False if background
+                if self.local_image[row][col]:
+                    m_pq += pow(row, p) * pow(col, q)
+        return m_pq
+
+    def _calculate_M_pq(self, p: int, q: int) -> int:
+        local_height, local_width = self.local_image.shape
+        M_pq = 0
+        for row in range(local_height):
+            for col in range(local_width):
+                # local image has bool value - True if there is object's pixel, False if background
+                if self.local_image[row][col]:
+                    M_pq += pow(row - self.center[0], p) * pow(
+                        col - self.center[1], q)
+        return M_pq
+
+    def _calculate_N_pq(self, p: int, q: int) -> float:
+        return self._calculate_M_pq(p, q) / pow(self.pixels_count(),
+                                                ((p + q) / 2) + 1)
+
+    def _calculate_M1_normalized(self) -> float:
+        return self._calculate_N_pq(2, 0) + self._calculate_N_pq(0, 2)
+
+    def _calculate_M7_normalized(self) -> float:
+        N_20 = self._calculate_N_pq(2, 0)
+        N_02 = self._calculate_N_pq(0, 2)
+        N_11 = self._calculate_N_pq(1, 1)
+
+        return N_20 * N_02 - pow(N_11, 2)
+
     def _build_local_image(self) -> np.ndarray:
         local_height = self.bbox[1][0] - self.bbox[0][0] + 1
         local_width = self.bbox[1][1] - self.bbox[0][1] + 1
@@ -98,7 +133,7 @@ class Segment:
         return local_image
 
 
-def segmentation(image: np.ndarray) -> List[Segment]:
+def segmentation(image: np.ndarray) -> List[List[Segment]]:
     image_height, image_width, _ = image.shape
     visited = np.zeros((image_height, image_width), dtype=bool)
 

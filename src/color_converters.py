@@ -20,6 +20,7 @@ def BGR_to_HSV(image: np.ndarray) -> np.ndarray:
                 s = 0
 
             #calc hue
+            h = 0  # suppress possible unbound error
             if r == g == b:
                 h = 0
             elif v == r:

@@ -1,11 +1,11 @@
-import cv2 as cv
 import sys
+import cv2 as cv
+import numpy as np
 import color_converters as cc
 import resizers as res
 import processing as proc
-import config
+from config import BOUNDING_BOX_COLOR, BOUNDING_BOX_THICKNESS
 import segmentation as seg
-import numpy as np
 
 
 def main() -> int:
@@ -22,15 +22,19 @@ def main() -> int:
     blured = proc.applay_convolution(cc.HSV_to_BGR(equlized_hsv),
                                      proc.BLUR_KERNEL_CLASSIC)
     # blured = proc.applay_convolution(resized, proc.BLUR_KERNEL_CLASSIC)
+    segments = seg.segmentation(cc.BGR_to_HSV(blured))
+    for segment_list in segments:
+        for segment in segment_list:
+            p1 = (segment.bbox[0][1], segment.bbox[0][0])
+            p2 = (segment.bbox[1][1], segment.bbox[1][0])
+            cv.rectangle(resized,
+                         p1,
+                         p2,
+                         color=BOUNDING_BOX_COLOR,
+                         thickness=BOUNDING_BOX_THICKNESS)
+    print("Break")
     cv.imshow("resized", resized)
     cv.imshow("fixed", blured)
-    segments = seg.segmentation(cc.BGR_to_HSV(blured))
-    print("Break")
-
-    # resized = res.resize(image, 360, 640, res.bilinear_interpolation)
-    # blured = proc.applay_convolution(resized, proc.BLUR_KERNEL_CLASSIC)
-    # cv.imshow("resized", resized)
-    # cv.imshow("image", blured)
     cv.waitKey(0)
 
     return 0
