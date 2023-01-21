@@ -30,7 +30,6 @@ Y_VALUE_MAX_THRSHOLD = 255
 MIN_SEG_PIXEL_COUNT = 20
 
 # recognition
-
 MIN_W3 = 0.0
 MAX_W3 = 1.0
 
@@ -40,7 +39,9 @@ MAX_M1_NORM = 0.23
 MIN_M7_NORM = 0.0068
 MAX_M7_NORM = 0.0071
 
-# drawing
+# recognize as ms logo if only 3 squares match
+APPROX_RECOGNITION = False
 
+# drawing
 BOUNDING_BOX_COLOR = (0, 255, 0)  # in BGR
 BOUNDING_BOX_THICKNESS = 1

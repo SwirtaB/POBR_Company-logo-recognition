@@ -35,6 +35,8 @@ def main() -> int:
                          p2,
                          color=BOUNDING_BOX_COLOR,
                          thickness=BOUNDING_BOX_THICKNESS)
+
+    logos = idef.try_recognize_logo(segments)
     print("Break")
     cv.imshow("resized", resized)
     cv.waitKey(0)

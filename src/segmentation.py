@@ -31,6 +31,8 @@ class Segment:
                  image_width: int):
         self.pixels = pixels
         self.bbox = self._calculate_bounding_box(image_height, image_width)
+        self.global_center = ((self.bbox[1][0] - self.bbox[0][0] - 1) / 2,
+                              (self.bbox[1][1] - self.bbox[0][1] - 1) / 2)
         self.local_image = self._build_local_image()
         self.center = (round(self._calculate_m_pq(1, 0) / self.pixels_count()),
                        round(self._calculate_m_pq(0, 1) / self.pixels_count()))
