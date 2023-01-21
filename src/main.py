@@ -6,6 +6,7 @@ import resizers as res
 import processing as proc
 from config import BOUNDING_BOX_COLOR, BOUNDING_BOX_THICKNESS
 import segmentation as seg
+import identyfication as idef
 
 
 def main() -> int:
@@ -23,6 +24,8 @@ def main() -> int:
                                      proc.BLUR_KERNEL_CLASSIC)
     # blured = proc.applay_convolution(resized, proc.BLUR_KERNEL_CLASSIC)
     segments = seg.segmentation(cc.BGR_to_HSV(blured))
+    segments = idef.filter_segments(segments)
+
     for segment_list in segments:
         for segment in segment_list:
             p1 = (segment.bbox[0][1], segment.bbox[0][0])
@@ -34,7 +37,6 @@ def main() -> int:
                          thickness=BOUNDING_BOX_THICKNESS)
     print("Break")
     cv.imshow("resized", resized)
-    cv.imshow("fixed", blured)
     cv.waitKey(0)
 
     return 0

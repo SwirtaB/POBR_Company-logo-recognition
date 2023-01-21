@@ -31,14 +31,14 @@ MIN_SEG_PIXEL_COUNT = 20
 
 # recognition
 
-MIN_W3 = 0
-MAX_W3 = 10
+MIN_W3 = 0.0
+MAX_W3 = 1.0
 
-MIN_M1 = 0.16
-MAX_M1 = 0.22
+MIN_M1_NORM = 0.16
+MAX_M1_NORM = 0.23
 
-MIN_M7 = 0.0068
-MAX_M7 = 0.0071
+MIN_M7_NORM = 0.0068
+MAX_M7_NORM = 0.0071
 
 # drawing
 
