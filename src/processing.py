@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Tuple
 
 BLUR_KERNEL_CLASSIC = np.array([[1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9],
                                 [1 / 9, 1 / 9, 1 / 9]])
@@ -8,6 +9,7 @@ BLUR_KERNEL_GAUSS = np.array([[1 / 10, 1 / 10,
 BLUR_KERNEL_LAPLACE = np.array([[1 / 16, 2 / 16, 1 / 16],
                                 [2 / 16, 4 / 16, 2 / 16],
                                 [1 / 16, 2 / 16, 1 / 16]])
+BLUR_KERNEL_CLASSIC_5x5 = np.full((5, 5), fill_value=1 / 25)
 
 
 def applay_convolution(image: np.ndarray, kernel: np.ndarray) -> np.ndarray:
@@ -17,14 +19,30 @@ def applay_convolution(image: np.ndarray, kernel: np.ndarray) -> np.ndarray:
     image_height, image_width, channels = image.shape
     output = np.zeros(image.shape, dtype=np.uint8)
 
-    for row in range(1, image_height - 1):
-        for col in range(1, image_width - 1):
+    for row in range(shift_height, image_height - shift_height):
+        for col in range(shift_width, image_width - shift_width):
             for ch in range(channels):
                 output[row][col][ch] = np.sum(np.multiply(
                     image[:, :, ch][row - shift_width:row + shift_width + 1,
                                     col - shift_height:col + shift_height + 1],
                     kernel),
                                               dtype=np.uint8)
+    return output
+
+
+def ranking_filter(image: np.ndarray, kernel_shape: Tuple[int, int],
+                   function) -> np.ndarray:
+    image_height, image_width = image.shape
+    shift_width = int(np.floor(kernel_shape[1] / 2))
+    shift_height = int(np.floor(kernel_shape[0] / 2))
+    output = np.zeros(image.shape, dtype=bool)
+
+    for row in range(1, image_height - 1):
+        for col in range(1, image_width - 1):
+            output[row][col] = function(image[np.ix_(
+                list(range(row - shift_width, row + shift_width + 1)),
+                list(range(col - shift_height, col + shift_height + 1)))])
+
     return output
 
 

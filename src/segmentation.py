@@ -1,6 +1,7 @@
 from typing import List, Tuple
 import numpy as np
 from config import *
+from processing import ranking_filter
 import cv2 as cv
 import math
 import copy
@@ -43,6 +44,15 @@ class Segment:
 
     def pixels_count(self) -> int:
         return len(self.pixels)
+
+    def update_image(self, image: np.ndarray):
+        self.local_image = image
+        self.center = (round(self._calculate_m_pq(1, 0) / self.pixels_count()),
+                       round(self._calculate_m_pq(0, 1) / self.pixels_count()))
+        self.W3 = self._calculate_w3(self._calculate_circumference(),
+                                     len(self.pixels))
+        self.M1_norm = self._calculate_M1_normalized()
+        self.M7_norm = self._calculate_M7_normalized()
 
     def _calculate_bounding_box(
             self, image_height: int,
@@ -157,9 +167,20 @@ def segmentation(image: np.ndarray) -> List[List[Segment]]:
                     if mask[row][col] != 0:
                         segment = flood_fill(mask, visited, (row, col))
                         if segment.pixels_count() > MIN_SEG_PIXEL_COUNT:
+                            if USE_CLOSE_OP:
+                                segment.update_image(
+                                    _close_operator(segment.local_image, 2))
+
                             mask_objects_list.append(segment)
+
+        # for i, object in enumerate(mask_objects_list):
+        #     object.local_image.dtype = 'uint8'
+        #     cv.imshow(str(i), object.local_image * 255)
+        # cv.waitKey(0)
+
         objects_list.append(copy.deepcopy(mask_objects_list))
         mask_objects_list.clear()
+        visited = np.zeros((image_height, image_width), dtype=bool)
 
     return objects_list
 
@@ -206,12 +227,16 @@ def threshold(image: np.ndarray, thresholds: List[int],
     return mask
 
 
-def _delate():
-    pass
+def _close_operator(image: np.ndarray, n: int) -> np.ndarray:
+    output = ranking_filter(image, (3, 3), np.any)
+    for _ in range(n - 1):
+        # dilation
+        output = ranking_filter(output, (3, 3), np.any)
+    for _ in range(n):
+        # erosion
+        output = ranking_filter(output, (3, 3), np.all)
 
-
-def _erode():
-    pass
+    return output
 
 
 def _threshold_R(pixel: np.ndarray, thresholds: List[int]) -> np.uint8:

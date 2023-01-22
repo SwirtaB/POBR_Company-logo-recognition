@@ -31,14 +31,14 @@ def _get_logo_bbox(image: np.ndarray, logos_list: List[List[seg.Segment]]):
 
 
 def main() -> int:
-    path = "./Data/ms_building_3.jpg"
+    path = "./Data/ms_multi_logo.jpg"
     image = cv.imread(path)
 
     if image is None:
         sys.exit(f"Could not read image under path: {path}")
 
-    resized = res.resize(image, np.uint(image.shape[1] / 4),
-                         np.uint(image.shape[0] / 4),
+    resized = res.resize(image, np.uint(image.shape[1] / 8),
+                         np.uint(image.shape[0] / 8),
                          res.bilinear_interpolation)
     equlized_hsv = proc.equalize_histogram(cc.BGR_to_HSV(resized))
     blured = proc.applay_convolution(cc.HSV_to_BGR(equlized_hsv),
