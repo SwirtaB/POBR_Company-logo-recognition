@@ -153,8 +153,8 @@ def segmentation(image: np.ndarray) -> List[List[Segment]]:
     for color in color_dict.keys():
         masks.append(threshold(image, color_dict[color], color))
 
-    for i, mask in enumerate(masks):
-        cv.imshow(str(i), mask)
+    # for i, mask in enumerate(masks):
+    #     cv.imshow(str(i), mask)
     # cv.waitKey(0)
 
     objects_list = []

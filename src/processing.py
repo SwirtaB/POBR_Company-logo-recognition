@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from typing import Tuple
 
 BLUR_KERNEL_CLASSIC = np.array([[1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9],
@@ -9,7 +10,6 @@ BLUR_KERNEL_GAUSS = np.array([[1 / 10, 1 / 10,
 BLUR_KERNEL_LAPLACE = np.array([[1 / 16, 2 / 16, 1 / 16],
                                 [2 / 16, 4 / 16, 2 / 16],
                                 [1 / 16, 2 / 16, 1 / 16]])
-BLUR_KERNEL_CLASSIC_5x5 = np.full((5, 5), fill_value=1 / 25)
 
 
 def applay_convolution(image: np.ndarray, kernel: np.ndarray) -> np.ndarray:
@@ -78,3 +78,24 @@ def equalize_histogram(image: np.ndarray) -> np.ndarray:
             image[row][col][2] = np.uint8(LUT[image[row][col][2]])
 
     return image
+
+
+def generate_classic_kernel(size: int) -> np.ndarray:
+    return np.full((size, size), fill_value=1 / pow(size, 2))
+
+
+def generate_gausse_kernel(sigma: float, size: int) -> np.ndarray:
+    kernel = np.zeros((size, size))
+    kernel_sum = 0
+    factor = 1 / (2 * math.pi * sigma * sigma)
+    divider = 2 * sigma * sigma
+
+    _x, _y = -math.floor(size / 2), -math.floor(size / 2)
+    for x in range(_x, (-_x) + 1):
+        for y in range(_y, (-_y) + 1):
+            kernel[x + 2][y +
+                          2] = factor * math.exp(-(x * x + y * y) / divider)
+            kernel_sum += kernel[x + 2][y + 2]
+
+    # normalization
+    return kernel / kernel_sum
