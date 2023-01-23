@@ -30,35 +30,35 @@ class Segment:
 
     def __init__(self, pixels: List[Tuple[int, int]], image_height: int,
                  image_width: int):
-        self.pixels = pixels
-        self.bbox = self._calculate_bounding_box(image_height, image_width)
+        self.bbox = self._calculate_bounding_box(pixels, image_height,
+                                                 image_width)
         self.global_center = ((self.bbox[1][0] + self.bbox[0][0]) / 2,
                               (self.bbox[1][1] + self.bbox[0][1]) / 2)
-        self.local_image = self._build_local_image()
+        self.local_image = self._build_local_image(pixels)
         self.center = (round(self._calculate_m_pq(1, 0) / self.pixels_count()),
                        round(self._calculate_m_pq(0, 1) / self.pixels_count()))
         self.W3 = self._calculate_w3(self._calculate_circumference(),
-                                     len(self.pixels))
+                                     self.pixels_count())
         self.M1_norm = self._calculate_M1_normalized()
         self.M7_norm = self._calculate_M7_normalized()
 
     def pixels_count(self) -> int:
-        return len(self.pixels)
+        return (self.local_image == True).sum()
 
     def update_image(self, image: np.ndarray):
         self.local_image = image
         self.center = (round(self._calculate_m_pq(1, 0) / self.pixels_count()),
                        round(self._calculate_m_pq(0, 1) / self.pixels_count()))
         self.W3 = self._calculate_w3(self._calculate_circumference(),
-                                     len(self.pixels))
+                                     self.pixels_count())
         self.M1_norm = self._calculate_M1_normalized()
         self.M7_norm = self._calculate_M7_normalized()
 
     def _calculate_bounding_box(
-            self, image_height: int,
+            self, pixels: List[Tuple[int, int]], image_height: int,
             image_width: int) -> Tuple[Tuple[int, int], Tuple[int, int]]:
         min_row, max_row, min_col, max_col = image_height, 0, image_width, 0
-        for pixel in self.pixels:
+        for pixel in pixels:
             if pixel[0] < min_row:
                 min_row = pixel[0]
             if pixel[0] > max_row:
@@ -130,13 +130,13 @@ class Segment:
 
         return N_20 * N_02 - pow(N_11, 2)
 
-    def _build_local_image(self) -> np.ndarray:
+    def _build_local_image(self, pixels: List[Tuple[int, int]]) -> np.ndarray:
         local_height = self.bbox[1][0] - self.bbox[0][0] + 1
         local_width = self.bbox[1][1] - self.bbox[0][1] + 1
         # +2 to make sure that i have at least one black pixel at boarders
         local_image = np.zeros((local_height + 2, local_width + 2), dtype=bool)
 
-        for pixel in self.pixels:
+        for pixel in pixels:
             # +1 to leave line of at least one black pixel on the left and on the top
             local_row = pixel[0] - self.bbox[0][0] + 1
             local_col = pixel[1] - self.bbox[0][1] + 1
@@ -153,9 +153,9 @@ def segmentation(image: np.ndarray) -> List[List[Segment]]:
     for color in color_dict.keys():
         masks.append(threshold(image, color_dict[color], color))
 
-    # for i, mask in enumerate(masks):
-    #     cv.imshow(str(i), mask)
-    # cv.waitKey(0)
+    if VERBOSE:
+        for i, mask in enumerate(masks):
+            cv.imshow(str(i), mask)
 
     objects_list = []
     mask_objects_list = []
@@ -168,8 +168,12 @@ def segmentation(image: np.ndarray) -> List[List[Segment]]:
                         segment = flood_fill(mask, visited, (row, col))
                         if segment.pixels_count() > MIN_SEG_PIXEL_COUNT:
                             if USE_CLOSE_OP:
-                                segment.update_image(
-                                    _close_operator(segment.local_image, 2))
+                                new_image = _close_operator(
+                                    segment.local_image, 2)
+                                if (new_image == True).sum() == 0:
+                                    break
+
+                                segment.update_image(new_image)
 
                             mask_objects_list.append(segment)
 

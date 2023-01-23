@@ -23,7 +23,6 @@ def filter_segments(segments: List[List[Segment]]) -> List[List[Segment]]:
     return result
 
 
-# FIXME refactor
 def try_recognize_logo(segments: List[List[Segment]]) -> List[List[Segment]]:
     recognized_logos = []
     for R_square in segments[0]:
