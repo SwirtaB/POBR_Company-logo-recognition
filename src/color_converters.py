@@ -66,9 +66,3 @@ def HSV_to_BGR(image: np.ndarray) -> np.ndarray:
                                       dtype=np.uint8)
 
     return imageBGR
-
-
-# print(
-#     BGR_to_HSV(
-#         np.array([[[64, 93, 180], [140, 162, 250], [33, 138, 250],
-#                    [88, 45, 128]]])))
