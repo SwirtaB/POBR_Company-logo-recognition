@@ -177,11 +177,6 @@ def segmentation(image: np.ndarray) -> List[List[Segment]]:
 
                             mask_objects_list.append(segment)
 
-        # for i, object in enumerate(mask_objects_list):
-        #     object.local_image.dtype = 'uint8'
-        #     cv.imshow(str(i), object.local_image * 255)
-        # cv.waitKey(0)
-
         objects_list.append(copy.deepcopy(mask_objects_list))
         mask_objects_list.clear()
         visited = np.zeros((image_height, image_width), dtype=bool)
